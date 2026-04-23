@@ -81,23 +81,31 @@ def load_and_process(file):
 
     # Feature engineering
     df['Total_Income'] = df['ApplicantIncome'] + df['CoapplicantIncome']
-    df['EMI'] = df['LoanAmount'] / df['Loan_Amount_Term']
-    df['ApplicantIncome_Log'] = np.log(df['ApplicantIncome'] + 1)
-    df['LoanAmount_Log'] = np.log(df['LoanAmount'] + 1)
-    df['Total_Income_Log'] = np.log(df['Total_Income'] + 1)
 
-    # Bias copy (before encoding)
+    df['Loan_Amount_Term'] = df['Loan_Amount_Term'].replace(0, np.nan)
+    df['EMI'] = df['LoanAmount'] / df['Loan_Amount_Term']
+
+    df['ApplicantIncome_Log'] = np.log1p(df['ApplicantIncome'])
+    df['CoapplicantIncome_Log'] = np.log1p(df['CoapplicantIncome'])
+    df['LoanAmount_Log'] = np.log1p(df['LoanAmount'])
+    df['Total_Income_Log'] = np.log1p(df['Total_Income'])
+
+    # Bias copy
     bias_df = df.copy()
     bias_df['Loan_Status_Num'] = bias_df['Loan_Status'].map({'Y': 1, 'N': 0})
     bias_df['Income_Group'] = pd.qcut(bias_df['Total_Income'], q=3, labels=['Low', 'Medium', 'High'])
 
-    # Encode for modelling
+    # Encoding
     model_df = df.copy()
     model_df.drop('Loan_ID', axis=1, inplace=True)
     model_df['Loan_Status'] = model_df['Loan_Status'].map({'Y': 1, 'N': 0})
     categorical_cols = ['Gender', 'Married', 'Dependents', 'Education', 'Self_Employed', 'Property_Area']
     model_df = pd.get_dummies(model_df, columns=categorical_cols, drop_first=True)
 
+    # Cleaning
+    model_df = model_df.replace([np.inf, -np.inf], np.nan)
+    model_df = model_df.fillna(model_df.median(numeric_only=True))
+    model_df = model_df.fillna(0)
     X = model_df.drop('Loan_Status', axis=1)
     y = model_df['Loan_Status']
 
@@ -468,6 +476,7 @@ elif page == "🎯 Predict Loan":
             'EMI': emi,
             'ApplicantIncome_Log': np.log(applicant_income + 1),
             'CoapplicantIncome_Log': np.log(coapplicant_income + 1),
+            df['CoapplicantIncome_Log'] = np.log1p(df['CoapplicantIncome'])
             'LoanAmount_Log': np.log(loan_amount + 1),
             'Total_Income_Log': np.log(total_income + 1),
             # One-hot encoded columns
