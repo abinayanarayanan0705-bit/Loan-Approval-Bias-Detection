@@ -143,7 +143,7 @@ with st.sidebar:
 # ─────────────────────────────────────────────
 # LOAD DATA
 # ─────────────────────────────────────────────
-CSV_PATH = r"D:\ABA\2511004 - Final project\train_LOAN BIAS PROJECT.csv"
+CSV_PATH = "train_LOAN BIAS PROJECT.csv"
 
 try:
     (df, bias_df, X, y_test,
