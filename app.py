@@ -476,7 +476,7 @@ elif page == "🎯 Predict Loan":
             'EMI': emi,
             'ApplicantIncome_Log': np.log(applicant_income + 1),
             'CoapplicantIncome_Log': np.log(coapplicant_income + 1),
-            df['CoapplicantIncome_Log'] = np.log1p(df['CoapplicantIncome'])
+            'CoapplicantIncome_Log': np.log1p(coapplicant_income),
             'LoanAmount_Log': np.log(loan_amount + 1),
             'Total_Income_Log': np.log(total_income + 1),
             # One-hot encoded columns
